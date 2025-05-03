@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StretchBuy - The Future of Grocery Supply Chains</title>
+    <link rel="icon" href="logo.png" type="image/x-icon">
+    <meta name="description" content="Revolutionizing food distribution with AI-powered connections between farmers, markets, and consumers.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 3D Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    
+    <!-- Theatre.js -->
+    <script src="https://unpkg.com/@theatre/core@0.4.8/dist/theatre-core.js"></script>
+    <script src="https://unpkg.com/@theatre/studio@0.4.8/dist/theatre-studio.js"></script>
+    
+    <style>
+        :root {
+            --primary: #03542d;
+            --primary-dark: #00a8b5;
+            --secondary: #ff4d79;
+            --dark: #0a0a14;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --dark-gray: #2d3748;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--light);
+            background-color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--dark);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--light);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        /* Hero Section */
+        .hero-container {
+            position: relative;
+            width: 100%;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow: hidden;
+            background: rgba(0,10,20,0.3);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 70% 30%, rgba(0,100,255,0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+        
+        .hero-content {
+            display: flex;
+            max-width: 1400px;
+            width: 100%;
+            gap: 3rem;
+            align-items: center;
+            z-index: 1;
+        }
+        
+        .text-content {
+            flex: 1;
+            max-width: 600px;
+            padding: 2rem;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, #a0e9ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1.2;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .tech-tags {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .primary-btn, .secondary-btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 1rem;
+            border: none;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, #00a6ff, #0066ff);
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,166,255,0.3);
+        }
+        
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0,166,255,0.4);
+        }
+        
+        .secondary-btn {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
+        }
+        
+        .secondary-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        
+        .visualization-container {
+            position: relative;
+            flex: 1;
+            height: 500px;
+            min-width: 50%;
+            background: rgba(0,20,40,0.2);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        
+        .delivery-route {
+            position: absolute;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #00a6ff, transparent);
+            bottom: 30%;
+            left: 10%;
+            box-shadow: 0 0 15px rgba(0,166,255,0.5);
+            animation: route-pulse 2s infinite alternate;
+        }
+        
+        @keyframes route-pulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .delivery-bike {
+            position: absolute;
+            bottom: 30%;
+            left: 10%;
+            transform: translate(-50%, 50%);
+            animation: bike-delivery 8s linear infinite;
+            z-index: 3;
+        }
+        
+        .bike {
+            width: 60px;
+            height: 30px;
+            background: #00a6ff;
+            border-radius: 5px;
+            position: relative;
+            box-shadow: 0 0 15px rgba(0,166,255,0.7);
+        }
+        
+        .rider {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            background: #00a6ff;
+            top: -30px;
+            left: 20px;
+            border-radius: 3px;
+        }
+        
+        .package {
+            position: absolute;
+            width: 30px;
+            height: 20px;
+            background: #ff6b00;
+            top: -15px;
+            left: 50px;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255,107,0,0.7);
+        }
+        
+        .bike-glow {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, rgba(0,166,255,0.4) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+        }
+        
+        .location-pin {
+            position: absolute;
+            z-index: 2;
+        }
+        
+        .pin {
+            width: 12px;
+            height: 12px;
+            background: #ff4757;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,71,87,0.3);
+            animation: pin-pulse 2s infinite;
+        }
+        
+        @keyframes pin-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,71,87,0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255,71,87,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,71,87,0); }
+        }
+        
+        .label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 0.8rem;
+            background: rgba(0,0,0,0.7);
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            color: white;
+        }
+        
+        .warehouse {
+            top: 20%;
+            left: 15%;
+        }
+        
+        .home {
+            top: 60%;
+            left: 80%;
+        }
+        
+        .data-display {
+            position: absolute;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.8rem;
+            color: white;
+            font-family: monospace;
+            display: flex;
+            align-items: flex-end;
+            gap: 0.3rem;
+        }
+        
+        .data-display .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00a6ff;
+            line-height: 1;
+        }
+        
+        .speed {
+            top: 15%;
+            right: 10%;
+        }
+        
+        .eta {
+            top: 25%;
+            right: 10%;
+        }
+        
+        .city-background {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(transparent, rgba(0,30,60,0.5));
+            background-image: 
+                linear-gradient(rgba(0,166,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,166,255,0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        @keyframes bike-delivery {
+            0% { left: 10%; }
+            100% { left: 90%; }
+        }
+        
+        /* About Us Section */
+        .about-section {
+            padding: 8rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .about-container {
+            display: flex;
+            align-items: center;
+            gap: 4rem;
+            position: relative;
+        }
+        
+        .about-content {
+            flex: 1;
+            z-index: 2;
+        }
+        
+        .about-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .about-text {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .about-visual {
+            flex: 1;
+            height: 500px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .network-visual {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .network-node {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(3, 84, 45, 0.5);
+        }
+        
+        .network-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            transform-origin: left center;
+        }
+        
+        .about-highlight {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(3, 84, 45, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(30px);
+            z-index: -1;
+        }
+        
+        /* Features Section */
+        .features-section {
+            padding: 8rem 0;
+            background: rgba(10, 10, 20, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5rem;
+            background: linear-gradient(to right, var(--primary), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .feature-card {
+            background: rgba(10, 10, 20, 0.7);
+            border-radius: 15px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(0, 240, 255, 0.3);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.05));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+        
+        .feature-card p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+        
+        .feature-highlight {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(3, 84, 45, 0.3) 0%, transparent 70%);
+            z-index: -1;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 1024px) {
+            .hero-content {
+                flex-direction: column;
+            }
+            
+            .visualization-container {
+                width: 100%;
+                min-height: 400px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .about-container {
+                flex-direction: column;
+            }
+            
+            .about-visual {
+                width: 100%;
+                height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: rgba(10, 10, 20, 0.95);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+                transition: right 0.3s ease;
+                backdrop-filter: blur(10px);
+                z-index: 90;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .about-title, .section-title {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .primary-btn, .secondary-btn {
+                width: 100%;
+            }
+            
+            .about-title, .section-title {
+                font-size: 1.8rem;
+            }
+            
+            .feature-card {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div id="vanta-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="container">
+        <div class="logo">StretchBuy<span></span></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="store.html">Shop Location</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="howitworks.html">How It Works</a></li>
+        </ul>
+        <button class="cta-button">Get Started</button>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero-container">
+        <div class="hero-overlay"></div>
+        
+        <div class="hero-content">
+            <div class="text-content">
+                <h1>Neighborhood Groceries Delivery System</h1>
+                <p class="subtitle">Sketch Buy Brings Products To Your Door in Minutes From Local Shelves To Your Location</p>
+                
+                <div class="tech-tags">
+                    <span class="tag">🚀 15-min delivery</span>
+                    <span class="tag">🌱 Payment Plans</span>
+                    <span class="tag">📱 Location-based Shopping</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="primary-btn">
+                        <a href="login.html" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/></svg>
+                            Login In
+                        </a>
+                    </button>
+                    <button class="secondary-btn">
+                        <a href="signup.html" style="display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">
+                            <svg class="icon" viewBox="0 0 24 24"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
+                            Sign Up Today
+                        </a>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="visualization-container">
+                <!-- Delivery Route Line -->
+                <div class="delivery-route"></div>
+                
+                <!-- Animated Motorcycle -->
+                <div class="delivery-bike">
+                    <div class="bike"></div>
+                    <div class="rider"></div>
+                    <div class="package"></div>
+                    <div class="bike-glow"></div>
+                </div>
+                
+                <!-- Location Pins -->
+                <div class="location-pin warehouse">
+                    <div class="pin"></div>
+                    <div class="label">Local Store</div>
+                </div>
+                
+                <div class="location-pin home">
+                    <div class="pin"></div>
+                    <div class="label">Your Location</div>
+                </div>
+                
+                <!-- Data Overlays -->
+                <div class="data-display speed">
+                    <div class="value">15</div>
+                    <div class="unit">Minutes</div>
+                </div>
+                
+                <div class="data-display eta">
+                    <div class="value" id="nigeria-time"></div>
+                </div>
+                
+                <!-- Cityscape Silhouette -->
+                <div class="city-background"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Us Section -->
+    <section class="about-section" id="about">
+        <div class="container">
+            <div class="about-container">
+                <div class="about-content">
+                    <h2 class="about-title">Connecting Products  Through Smart Logistics</h2>
+                    <p class="about-text">StretchBuy is revolutionizing the way neighborhoods access groceries and products  by creating a seamless bridge between local stores and residents. Our platform optimizes inventory in real-time, ensuring you get what you need when you need it.</p>
+                    <p class="about-text">Founded in 2024 Our mission is to strengthen local economies while providing unparalleled convenience.</p>
+                    <button class="cta-button" onclick="window.location.href='about.html'">Learn More About Us</button>
+                </div>
+                <div class="about-visual">
+                    <div class="network-visual" id="network-visual">
+                        <!-- Nodes and connections will be added by Theatre.js -->
+                    </div>
+                    <div class="about-highlight" id="about-highlight"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose StretchBuy</h2>
+            <div class="features-grid">
+                <div class="feature-card" id="feature1">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast Delivery</h3>
+                    <p>Get your groceries in as little as 15 minutes with our optimized routing system that connects you to the nearest available store.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+                <div class="feature-card" id="feature2">
+                    <div class="feature-icon">🌱</div>
+                    <h3>Support Local Businesses</h3>
+                    <p>Every order helps sustain your neighborhood stores and keeps money circulating in your community.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+                <div class="feature-card" id="feature3">
+                    <div class="feature-icon">📱</div>
+                    <h3>Smart Shopping Tools</h3>
+                    <p>Our app learns your preferences and suggests items based on your location, budget, and past purchases.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+                <div class="feature-card" id="feature4">
+                    <div class="feature-icon">💰</div>
+                    <h3>Flexible Payment Options</h3>
+                    <p>Choose from pay-on-delivery, installment plans, or digital payments - whatever works for you.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+                <div class="feature-card" id="feature5">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Real-Time Inventory</h3>
+                    <p>See exactly what's available at nearby stores before you order, with live stock updates.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+                <div class="feature-card" id="feature6">
+                    <div class="feature-icon">🌍</div>
+                    <h3>Reduced Carbon Footprint</h3>
+                    <p>Our optimized delivery routes mean fewer vehicles on the road and lower emissions for your community.</p>
+                    <div class="feature-highlight"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Initialize Vanta.js animated background
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00f0ff,
+            backgroundColor: 0x0a0a14,
+            points: 10.00,
+            maxDistance: 25.00,
+            spacing: 18.00
+        });
+        
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Nigeria Time Display
+        function updateNigeriaTime() {
+            const now = new Date();
+            const nigeriaTimeFormatter = new Intl.DateTimeFormat('en-NG', {
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                timeZone: 'Africa/Lagos',
+                hour12: true
+            });
+        
+            const nigeriaTimeString = nigeriaTimeFormatter.format(now);
+            document.getElementById('nigeria-time').textContent = nigeriaTimeString;
+        }
+        
+        setInterval(updateNigeriaTime, 1000);
+        updateNigeriaTime();
+        
+        // Initialize Theatre.js
+        document.addEventListener('DOMContentLoaded', () => {
+            // Only initialize Theatre.js if it's available
+            if (typeof Theatre !== 'undefined') {
+                const project = Theatre.getProject('StretchBuy Animations', { state: 'invisible' });
+                const sheet = project.getSheet('Page Animations');
+                
+                // About Section Network Animation
+                const networkVisual = document.getElementById('network-visual');
+                const aboutHighlight = document.getElementById('about-highlight');
+                
+                // Create nodes and connections
+                const nodes = [];
+                const connections = [];
+                
+                // Create 8 nodes in a circular pattern
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const radius = 150;
+                    const x = Math.cos(angle) * radius + 50;
+                    const y = Math.sin(angle) * radius + 50;
+                    
+                    const node = document.createElement('div');
+                    node.className = 'network-node';
+                    node.style.left = `${x}%`;
+                    node.style.top = `${y}%`;
+                    networkVisual.appendChild(node);
+                    nodes.push(node);
+                    
+                    // Create connections to center
+                    const centerX = 50;
+                    const centerY = 50;
+                    
+                    const line = document.createElement('div');
+                    line.className = 'network-line';
+                    
+                    // Calculate line position and length
+                    const length = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    const lineAngle = Math.atan2(y - centerY, x - centerX);
+                    
+                    line.style.width = `${length}%`;
+                    line.style.left = `${centerX}%`;
+                    line.style.top = `${centerY}%`;
+                    line.style.transform = `rotate(${lineAngle}rad)`;
+                    
+                    networkVisual.appendChild(line);
+                    connections.push(line);
+                }
+                
+                // Add center node
+                const centerNode = document.createElement('div');
+                centerNode.className = 'network-node';
+                centerNode.style.left = '50%';
+                centerNode.style.top = '50%';
+                centerNode.style.width = '30px';
+                centerNode.style.height = '30px';
+                centerNode.style.background = 'var(--secondary)';
+                networkVisual.appendChild(centerNode);
+                
+                // Create animation sequence
+                sheet.sequence('Network Animation', ({ unblock }) => {
+                    // Animate nodes appearing
+                    nodes.forEach((node, i) => {
+                        sheet.object(`Node ${i}`, {
+                            opacity: [0, 1],
+                            scale: [0.5, 1]
+                        }).onValuesChange(({ opacity, scale }) => {
+                            node.style.opacity = opacity;
+                            node.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                        });
+                        
+                        unblock(i * 0.1);
+                    });
+                    
+                    // Animate connections
+                    connections.forEach((connection, i) => {
+                        sheet.object(`Connection ${i}`, {
+                            width: [0, '100%']
+                        }).onValuesChange(({ width }) => {
+                            connection.style.width = width;
+                        });
+                        
+                        unblock(i * 0.1 + 0.5);
+                    });
+                    
+                    // Animate highlight pulse
+                    sheet.object('About Highlight', {
+                        opacity: [0, 0.5, 0],
+                        scale: [0.8, 1.2]
+                    }).onValuesChange(({ opacity, scale }) => {
+                        aboutHighlight.style.opacity = opacity;
+                        aboutHighlight.style.transform = `scale(${scale})`;
+                    });
+                    
+                    unblock(1.5);
+                });
+                
+                // Feature Card Animations
+                const featureCards = [
+                    document.getElementById('feature1'),
+                    document.getElementById('feature2'),
+                    document.getElementById('feature3'),
+                    document.getElementById('feature4'),
+                    document.getElementById('feature5'),
+                    document.getElementById('feature6')
+                ];
+                
+                sheet.sequence('Feature Cards', ({ unblock }) => {
+                    featureCards.forEach((card, i) => {
+                        sheet.object(`Feature ${i + 1}`, {
+                            y: [50, 0],
+                            opacity: [0, 1],
+                            rotateZ: [-5, 0]
+                        }).onValuesChange(({ y, opacity, rotateZ }) => {
+                            card.style.transform = `translateY(${y}px) rotateZ(${rotateZ}deg)`;
+                            card.style.opacity = opacity;
+                        });
+                        
+                        unblock(i * 0.15);
+                    });
+                });
+                
+                // Play animations when section is in view
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            if (entry.target.id === 'about') {
+                                sheet.sequence('Network Animation').play();
+                            } else if (entry.target.id === 'features') {
+                                sheet.sequence('Feature Cards').play();
+                            }
+                        }
+                    });
+                }, { threshold: 0.3 });
+                
+                observer.observe(document.getElementById('about'));
+                observer.observe(document.getElementById('features'));
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management | StretchBuy</title>
+    <link rel="icon" href="logo.png" type="image/x-icon">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 3D Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #03542d;
+            --primary-dark: #00a8b5;
+            --secondary: #ff4d79;
+            --dark: #0a0a14;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --dark-gray: #2d3748;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--light);
+            background-color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--dark);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--light);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        /* Profile Management Styles */
+        .profile-container {
+            display: flex;
+            min-height: 80vh;
+            padding: 4rem 0;
+            position: relative;
+        }
+        
+        .profile-tabs {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+            margin-right: 2rem;
+        }
+        
+        .profile-tab {
+            padding: 1rem;
+            background: rgba(10, 10, 20, 0.5);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            color: var(--light);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .profile-tab:hover {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--primary);
+        }
+        
+        .profile-tab.active {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .profile-content {
+            flex: 1;
+            background: rgba(10, 10, 20, 0.7);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            min-height: 500px;
+        }
+        
+        .profile-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .profile-section.active {
+            display: block;
+        }
+        
+        .profile-header {
+            margin-bottom: 2rem;
+        }
+        
+        .profile-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .profile-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 0 auto 1.5rem;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid var(--primary);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-avatar-btn:hover {
+            background: var(--primary);
+        }
+        
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .info-value {
+            font-weight: 400;
+        }
+        
+        .edit-btn {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--primary);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .edit-btn:hover {
+            background: rgba(0, 240, 255, 0.2);
+        }
+        
+        .profile-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.2);
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.5);
+            transition: color 0.3s ease;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .cancel-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cancel-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--dark);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+        }
+        
+        /* Error and Success Messages */
+        .error-message {
+            color: var(--secondary);
+            background: rgba(255, 77, 121, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: none;
+        }
+        
+        .success-message {
+            color: var(--primary);
+            background: rgba(3, 84, 45, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: none;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .profile-container {
+                flex-direction: column;
+            }
+            
+            .profile-tabs {
+                width: 100%;
+                flex-direction: row;
+                overflow-x: auto;
+                margin-right: 0;
+                margin-bottom: 2rem;
+                padding-bottom: 0.5rem;
+            }
+            
+            .profile-tab {
+                white-space: nowrap;
+                margin-bottom: 0;
+                margin-right: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: rgba(10, 10, 20, 0.95);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+                transition: right 0.3s ease;
+                backdrop-filter: blur(10px);
+                z-index: 90;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+            
+            .profile-content {
+                padding: 1.5rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .cancel-btn,
+            .save-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div id="vanta-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="container">
+        <div class="logo">StretchBuy<span></span></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="login.html">Shop Location</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="howitworks.html">How It Works</a></li>
+        </ul>
+        <button class="cta-button" onclick="window.location.href='profile.html'">My Profile</button>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+    
+    <!-- Profile Management -->
+    <section class="profile-container container">
+        <div class="profile-tabs">
+            <button class="profile-tab active" data-tab="dashboard">Dashboard</button>
+            <button class="profile-tab" data-tab="edit-name">Edit Name</button>
+            <button class="profile-tab" data-tab="edit-email">Change Email</button>
+            <button class="profile-tab" data-tab="edit-phone">Update Phone</button>
+            <button class="profile-tab" data-tab="change-password">Change Password</button>
+        </div>
+        
+        <div class="profile-content">
+            <!-- Dashboard Section -->
+            <div class="profile-section active" id="dashboard">
+                <div class="profile-header">
+                    <h2>Profile Dashboard</h2>
+                    <p>Welcome back! Here's your account information</p>
+                </div>
+                
+                <div class="profile-avatar">
+                    <img src="https://via.placeholder.com/150" alt="Profile Picture" id="avatar-img">
+                    <button class="edit-avatar-btn">Change Photo</button>
+                </div>
+                
+                <div class="profile-info">
+                    <div class="info-item">
+                        <div>
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value" id="display-name">Mike Jonas </div>
+                        </div>
+                        <button class="edit-btn" data-tab="edit-name">Edit</button>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div>
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value" id="display-email">MikeJonas@example.com</div>
+                        </div>
+                        <button class="edit-btn" data-tab="edit-email">Change</button>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div>
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value" id="display-phone">+23 9055 123-4567</div>
+                        </div>
+                        <button class="edit-btn" data-tab="edit-phone">Update</button>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div>
+                            <div class="info-label">Password</div>
+                            <div class="info-value">••••••••</div>
+                        </div>
+                        <button class="edit-btn" data-tab="change-password">Change</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Edit Name Section -->
+            <div class="profile-section" id="edit-name">
+                <div class="profile-header">
+                    <h2>Edit Your Name</h2>
+                    <p>Update your display name</p>
+                </div>
+                
+                <form class="profile-form" id="name-form">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" value="John Doe" required>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-tab="dashboard">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Edit Email Section -->
+            <div class="profile-section" id="edit-email">
+                <div class="profile-header">
+                    <h2>Change Email Address</h2>
+                    <p>Update your account email</p>
+                </div>
+                
+                <form class="profile-form" id="email-form">
+                    <div class="form-group">
+                        <label for="current-email">Current Email</label>
+                        <input type="email" id="current-email" value="john.doe@example.com" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-email">New Email</label>
+                        <input type="email" id="new-email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email-password">Confirm Password</label>
+                        <input type="password" id="email-password" name="password" required>
+                        <span class="password-toggle" onclick="togglePassword('email-password')">👁️</span>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-tab="dashboard">Cancel</button>
+                        <button type="submit" class="save-btn">Update Email</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Edit Phone Section -->
+            <div class="profile-section" id="edit-phone">
+                <div class="profile-header">
+                    <h2>Update Phone Number</h2>
+                    <p>Add or change your mobile number</p>
+                </div>
+                
+                <form class="profile-form" id="phone-form">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" value="+234 80 554 123-4567" placeholder="+1 (123) 456-7890">
+                        <small></small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-tab="dashboard">Cancel</button>
+                        <button type="submit" class="save-btn">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Change Password Section -->
+            <div class="profile-section" id="change-password">
+                <div class="profile-header">
+                    <h2>Change Password</h2>
+                    <p>Update your account password</p>
+                </div>
+                
+                <form class="profile-form" id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" name="current_password" required>
+                        <span class="password-toggle" onclick="togglePassword('current-password')">👁️</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" name="new_password" required>
+                        <span class="password-toggle" onclick="togglePassword('new-password')">👁️</span>
+                        <small>Minimum 8 characters</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password" name="confirm_password" required>
+                        <span class="password-toggle" onclick="togglePassword('confirm-password')">👁️</span>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="cancel-btn" data-tab="dashboard">Cancel</button>
+                        <button type="submit" class="save-btn">Change Password</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Messages -->
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+        </div>
+    </section>
+    
+    <script>
+        // Initialize Vanta.js animated background
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00f0ff,
+            backgroundColor: 0x0a0a14,
+            points: 10.00,
+            maxDistance: 25.00,
+            spacing: 18.00
+        });
+        
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Profile tab navigation
+        const profileTabs = document.querySelectorAll('.profile-tab');
+        const profileSections = document.querySelectorAll('.profile-section');
+        
+        profileTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and sections
+                profileTabs.forEach(t => t.classList.remove('active'));
+                profileSections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding section
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Edit buttons navigation
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and sections
+                profileTabs.forEach(t => t.classList.remove('active'));
+                profileSections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to target tab and section
+                document.querySelector(`.profile-tab[data-tab="${tabId}"]`).classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Cancel buttons navigation
+        document.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabId = btn.getAttribute('data-tab');
+                
+                // Remove active class from all tabs and sections
+                profileTabs.forEach(t => t.classList.remove('active'));
+                profileSections.forEach(s => s.classList.remove('active'));
+                
+                // Add active class to dashboard tab and section
+                document.querySelector('.profile-tab[data-tab="dashboard"]').classList.add('active');
+                document.getElementById('dashboard').classList.add('active');
+            });
+        });
+        
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            
+            // Find the corresponding toggle icon
+            const toggles = document.querySelectorAll('.password-toggle');
+            toggles.forEach(toggle => {
+                if (toggle.getAttribute('onclick').includes(inputId)) {
+                    toggle.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+                }
+            });
+        }
+        
+        // Form submissions
+        document.getElementById('name-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newName = document.getElementById('name').value;
+            document.getElementById('display-name').textContent = newName;
+            showSuccess('Name updated successfully');
+            switchToTab('dashboard');
+        });
+        
+        document.getElementById('email-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newEmail = document.getElementById('new-email').value;
+            document.getElementById('display-email').textContent = newEmail;
+            showSuccess('Email updated successfully');
+            switchToTab('dashboard');
+        });
+        
+        document.getElementById('phone-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newPhone = document.getElementById('phone').value;
+            document.getElementById('display-phone').textContent = newPhone;
+            showSuccess('Phone number updated successfully');
+            switchToTab('dashboard');
+        });
+        
+        document.getElementById('password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-password').value;
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            
+            if (newPass !== confirmPass) {
+                showError('Passwords do not match');
+                return;
+            }
+            
+            if (newPass.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+            
+            // In a real app, you would verify current password with server here
+            showSuccess('Password changed successfully');
+            switchToTab('dashboard');
+            
+            // Clear password fields
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+        });
+        
+        // Helper functions
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const successElement = document.getElementById('successMessage');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                successElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        function switchToTab(tabId) {
+            // Remove active class from all tabs and sections
+            profileTabs.forEach(t => t.classList.remove('active'));
+            profileSections.forEach(s => s.classList.remove('active'));
+            
+            // Add active class to target tab and section
+            document.querySelector(`.profile-tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+        
+        // Avatar upload simulation
+        document.querySelector('.edit-avatar-btn').addEventListener('click', function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = event => {
+                        document.getElementById('avatar-img').src = event.target.result;
+                        showSuccess('Profile picture updated');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            
+            input.click();
+        });
+    </script>
+</body>
+</html>

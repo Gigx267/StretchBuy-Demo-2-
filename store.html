@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Nearby | StretchBuy</title>
+    <link rel="icon" href="logo.png" type="image/x-icon">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    
+    <!-- 3D Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.net.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #03542d;
+            --primary-dark: #00a8b5;
+            --secondary: #ff4d79;
+            --dark: #0a0a14;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --dark-gray: #2d3748;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--light);
+            background-color: var(--dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            position: relative;
+            z-index: 100;
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--dark);
+            border: none;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 240, 255, 0.3);
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+        }
+        
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--light);
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+        
+        /* Shopping Page Styles */
+        .shopping-container {
+            display: flex;
+            min-height: 80vh;
+            padding: 2rem 0;
+            position: relative;
+            gap: 2rem;
+        }
+        
+        .map-container {
+            flex: 1;
+            min-height: 600px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        #store-map {
+            width: 100%;
+            height: 100%;
+            background: var(--dark-gray);
+        }
+        
+        .stores-list {
+            width: 350px;
+            background: rgba(10, 10, 20, 0.8);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        
+        .stores-list h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .store-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .store-item:hover {
+            background: rgba(0, 240, 255, 0.1);
+            border-color: var(--primary);
+        }
+        
+        .store-item.active {
+            background: rgba(0, 240, 255, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .store-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--light);
+        }
+        
+        .store-address {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 0.5rem;
+        }
+        
+        .store-distance {
+            font-size: 0.8rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .products-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+        
+        .products-container.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .products-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .close-products {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-products:hover {
+            color: var(--primary);
+        }
+        
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--primary);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .product-name {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .product-price {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .add-to-cart {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--light);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-cart:hover {
+            background: var(--primary);
+            color: var(--dark);
+        }
+        
+        .cart-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: var(--dark);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .cart-container:hover {
+            transform: scale(1.1);
+        }
+        
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--secondary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+        }
+        
+        .cart-modal.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .cart-header h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .close-cart {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .close-cart:hover {
+            color: var(--primary);
+        }
+        
+        .cart-items {
+            margin-bottom: 2rem;
+        }
+        
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cart-item-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .cart-item-image {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .cart-item-name {
+            font-weight: 500;
+        }
+        
+        .cart-item-price {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .cart-item-quantity {
+            width: 40px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--light);
+            padding: 0.3rem;
+            border-radius: 5px;
+        }
+        
+        .cart-item-remove {
+            background: rgba(255, 77, 121, 0.2);
+            color: var(--secondary);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item-remove:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .cart-summary {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+        
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .cart-total {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .checkout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: var(--dark);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 240, 255, 0.4);
+        }
+        
+        /* Location Prompt */
+        .location-prompt {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(10, 10, 20, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .location-prompt h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .location-prompt p {
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+        
+        .location-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .shopping-container {
+                flex-direction: column;
+            }
+            
+            .stores-list {
+                width: 100%;
+                max-height: 300px;
+            }
+            
+            .map-container {
+                min-height: 400px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: rgba(10, 10, 20, 0.95);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+                transition: right 0.3s ease;
+                backdrop-filter: blur(10px);
+                z-index: 90;
+            }
+            
+            .nav-links.active {
+                right: 0;
+            }
+            
+            .hamburger {
+                display: block;
+            }
+            
+            .hamburger.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            
+            .hamburger.active span:nth-child(2) {
+                opacity: 0;
+            }
+            
+            .hamburger.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(7px, -6px);
+            }
+            
+            .products-container,
+            .cart-modal {
+                max-width: 100%;
+            }
+            
+            .cart-container {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .location-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .location-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div id="vanta-bg"></div>
+    
+    <!-- Navigation -->
+    <nav class="container">
+        <div class="logo">StretchBuy<span></span></div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop Nearby</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="features.html">Features</a></li>
+            <li><a href="howitworks.html">How It Works</a></li>
+        </ul>
+        <button class="cta-button" onclick="window.location.href='profile.html'">My Profile</button>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+    
+    <!-- Shopping Container -->
+    <section class="shopping-container container">
+        <div class="map-container">
+            <div id="store-map"></div>
+        </div>
+        
+        <div class="stores-list" id="storesList">
+            <h2>Stores Nearby</h2>
+            <!-- Stores will be populated by JavaScript -->
+        </div>
+    </section>
+    
+    <!-- Products Container (hidden by default) -->
+    <div class="products-container" id="productsContainer">
+        <div class="products-header">
+            <h2 id="storeProductsTitle">Store Products</h2>
+            <button class="close-products" id="closeProducts">&times;</button>
+        </div>
+        <div class="products-grid" id="productsGrid">
+            <!-- Products will be populated by JavaScript -->
+        </div>
+    </div>
+    
+    <!-- Cart Button -->
+    <div class="cart-container" id="cartButton">
+        <i class="fas fa-shopping-cart"></i>
+        <div class="cart-count" id="cartCount">0</div>
+    </div>
+    
+    <!-- Cart Modal (hidden by default) -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-header">
+            <h2>Your Cart</h2>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be populated by JavaScript -->
+        </div>
+        
+        <div class="cart-summary">
+            <div class="cart-summary-row">
+                <span>Subtotal:</span>
+                <span id="cartSubtotal">$0.00</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Delivery Fee:</span>
+                <span id="deliveryFee">$2.99</span>
+            </div>
+            <div class="cart-summary-row">
+                <span>Tax:</span>
+                <span id="cartTax">$0.00</span>
+            </div>
+            <div class="cart-summary-row cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">$0.00</span>
+            </div>
+        </div>
+        
+        <button class="checkout-btn" id="checkoutBtn">Proceed to Checkout</button>
+    </div>
+    
+    <!-- Location Prompt (shown initially) -->
+    <div class="location-prompt" id="locationPrompt">
+        <h2>Find Stores Near You</h2>
+        <p>To show you the nearest grocery stores, we need access to your location. You can also enter your address manually.</p>
+        <div class="location-actions">
+            <button class="cta-button" id="allowLocation">Allow Location Access</button>
+            <button class="cancel-btn" id="enterManually">Enter Address Manually</button>
+        </div>
+    </div>
+    
+    <!-- Leaflet JS for maps -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    
+    <script>
+        // Initialize Vanta.js animated background
+        VANTA.NET({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x00f0ff,
+            backgroundColor: 0x0a0a14,
+            points: 10.00,
+            maxDistance: 25.00,
+            spacing: 18.00
+        });
+        
+        // Mobile menu toggle
+        const hamburger = document.getElementById('hamburger');
+        const navLinks = document.getElementById('navLinks');
+        
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        
+        // Sample data for stores
+        const stores = [
+            {
+                id: 1,
+                name: "FreshMart Grocery",
+                address: "123 Main St, Your City",
+                lat: 40.7128,
+                lng: -74.0060,
+                distance: "0.5 miles",
+                products: [
+                    { id: 101, name: "Organic Apples", price: 2.99, image: "https://via.placeholder.com/150?text=Apples" },
+                    { id: 102, name: "Whole Wheat Bread", price: 3.49, image: "https://via.placeholder.com/150?text=Bread" },
+                    { id: 103, name: "Organic Milk", price: 4.29, image: "https://via.placeholder.com/150?text=Milk" },
+                    { id: 104, name: "Free Range Eggs", price: 3.99, image: "https://via.placeholder.com/150?text=Eggs" },
+                    { id: 105, name: "Chicken Breast", price: 7.99, image: "https://via.placeholder.com/150?text=Chicken" },
+                    { id: 106, name: "Organic Spinach", price: 2.49, image: "https://via.placeholder.com/150?text=Spinach" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Neighborhood Market",
+                address: "456 Oak Ave, Your City",
+                lat: 40.7150,
+                lng: -74.0080,
+                distance: "0.8 miles",
+                products: [
+                    { id: 201, name: "Bananas", price: 0.59, image: "https://via.placeholder.com/150?text=Bananas" },
+                    { id: 202, name: "White Bread", price: 2.29, image: "https://via.placeholder.com/150?text=Bread" },
+                    { id: 203, name: "2% Milk", price: 3.19, image: "https://via.placeholder.com/150?text=Milk" },
+                    { id: 204, name: "Large Eggs", price: 2.99, image: "https://via.placeholder.com/150?text=Eggs" },
+                    { id: 205, name: "Ground Beef", price: 5.99, image: "https://via.placeholder.com/150?text=Beef" },
+                    { id: 206, name: "Iceberg Lettuce", price: 1.49, image: "https://via.placeholder.com/150?text=Lettuce" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Gourmet Grocers",
+                address: "789 Elm Blvd, Your City",
+                lat: 40.7100,
+                lng: -74.0030,
+                distance: "1.2 miles",
+                products: [
+                    { id: 301, name: "Organic Strawberries", price: 4.99, image: "https://via.placeholder.com/150?text=Strawberries" },
+                    { id: 302, name: "Sourdough Bread", price: 5.49, image: "https://via.placeholder.com/150?text=Bread" },
+                    { id: 303, name: "Almond Milk", price: 3.99, image: "https://via.placeholder.com/150?text=Milk" },
+                    { id: 304, name: "Organic Eggs", price: 5.49, image: "https://via.placeholder.com/150?text=Eggs" },
+                    { id: 305, name: "Salmon Fillet", price: 12.99, image: "https://via.placeholder.com/150?text=Salmon" },
+                    { id: 306, name: "Kale", price: 2.99, image: "https://via.placeholder.com/150?text=Kale" }
+                ]
+            }
+        ];
+        
+        // Initialize variables
+        let map;
+        let userLocation = { lat: 40.7128, lng: -74.0060 }; // Default to NYC
+        let userMarker;
+        let storeMarkers = [];
+        let cart = [];
+        
+        // DOM elements
+        const storesList = document.getElementById('storesList');
+        const productsContainer = document.getElementById('productsContainer');
+        const productsGrid = document.getElementById('productsGrid');
+        const storeProductsTitle = document.getElementById('storeProductsTitle');
+        const closeProducts = document.getElementById('closeProducts');
+        const cartButton = document.getElementById('cartButton');
+        const cartModal = document.getElementById('cartModal');
+        const cartItems = document.getElementById('cartItems');
+        const cartCount = document.getElementById('cartCount');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTax = document.getElementById('cartTax');
+        const cartTotal = document.getElementById('cartTotal');
+        const closeCart = document.getElementById('closeCart');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        const locationPrompt = document.getElementById('locationPrompt');
+        const allowLocation = document.getElementById('allowLocation');
+        const enterManually = document.getElementById('enterManually');
+        
+        // Initialize the application
+        function initApp() {
+            // Check if location prompt should be shown
+            if (localStorage.getItem('locationApproved')) {
+                locationPrompt.style.display = 'none';
+                initMap();
+            }
+            
+            // Render stores list
+            renderStoresList();
+        }
+        
+        // Initialize the map
+        function initMap() {
+            map = L.map('store-map').setView([userLocation.lat, userLocation.lng], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Add user marker
+            userMarker = L.marker([userLocation.lat, userLocation.lng], {
+                icon: L.divIcon({
+                    className: 'user-marker',
+                    html: '<div style="background-color: var(--primary); width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;"></div>',
+                    iconSize: [24, 24]
+                })
+            }).addTo(map);
+            userMarker.bindPopup("Your Location").openPopup();
+            
+            // Add store markers
+            addStoreMarkers();
+        }
+        
+        // Add store markers to the map
+        function addStoreMarkers() {
+            // Clear existing markers
+            storeMarkers.forEach(marker => map.removeLayer(marker));
+            storeMarkers = [];
+            
+            // Add new markers
+            stores.forEach(store => {
+                const marker = L.marker([store.lat, store.lng], {
+                    icon: L.divIcon({
+                        className: 'store-marker',
+                        html: '<div style="background-color: white; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--primary);"></div>',
+                        iconSize: [20, 20]
+                    })
+                }).addTo(map);
+                
+                marker.bindPopup(`<b>${store.name}</b><br>${store.address}`);
+                
+                marker.on('click', () => {
+                    // Highlight the store in the list
+                    document.querySelectorAll('.store-item').forEach(item => {
+                        item.classList.remove('active');
+                        if (parseInt(item.dataset.id) === store.id) {
+                            item.classList.add('active');
+                        }
+                    });
+                });
+                
+                storeMarkers.push(marker);
+            });
+        }
+        
+        // Render stores list
+        function renderStoresList() {
+            storesList.innerHTML = '<h2>Stores Nearby</h2>';
+            
+            stores.forEach(store => {
+                const storeElement = document.createElement('div');
+                storeElement.className = 'store-item';
+                storeElement.dataset.id = store.id;
+                storeElement.innerHTML = `
+                    <div class="store-name">${store.name}</div>
+                    <div class="store-address">${store.address}</div>
+                    <div class="store-distance">
+                        <i class="fas fa-map-marker-alt"></i> ${store.distance} away
+                    </div>
+                `;
+                
+                storeElement.addEventListener('click', () => {
+                    // Show products for this store
+                    showStoreProducts(store);
+                    
+                    // Highlight the store
+                    document.querySelectorAll('.store-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    storeElement.classList.add('active');
+                    
+                    // Center map on this store
+                    map.setView([store.lat, store.lng], 16);
+                });
+                
+                storesList.appendChild(storeElement);
+            });
+        }
+        
+        // Show products for a specific store
+        function showStoreProducts(store) {
+            storeProductsTitle.textContent = store.name;
+            productsGrid.innerHTML = '';
+            
+            store.products.forEach(product => {
+                const productElement = document.createElement('div');
+                productElement.className = 'product-card';
+                productElement.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-image">
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">$${product.price.toFixed(2)}</div>
+                    <button class="add-to-cart" data-id="${product.id}" data-name="${product.name}" data-price="${product.price}" data-image="${product.image}">
+                        Add to Cart
+                    </button>
+                `;
+                
+                productsGrid.appendChild(productElement);
+            });
+            
+            // Show products container
+            productsContainer.classList.add('active');
+            
+            // Add event listeners to add-to-cart buttons
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    const productName = e.target.dataset.name;
+                    const productPrice = parseFloat(e.target.dataset.price);
+                    const productImage = e.target.dataset.image;
+                    
+                    addToCart(productId, productName, productPrice, productImage);
+                });
+            });
+        }
+        
+        // Add product to cart
+        function addToCart(id, name, price, image) {
+            // Check if product already in cart
+            const existingItem = cart.find(item => item.id === id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id,
+                    name,
+                    price,
+                    image,
+                    quantity: 1
+                });
+            }
+            
+            // Update cart UI
+            updateCart();
+            
+            // Show success feedback
+            showFeedback(`${name} added to cart`);
+        }
+        
+        // Update cart UI
+        function updateCart() {
+            // Update cart count
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Update cart modal if open
+            if (cartModal.classList.contains('active')) {
+                renderCartItems();
+            }
+        }
+        
+        // Render cart items in modal
+        function renderCartItems() {
+            cartItems.innerHTML = '';
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p>Your cart is empty</p>';
+                cartSubtotal.textContent = '$0.00';
+                cartTax.textContent = '$0.00';
+                cartTotal.textContent = '$0.00';
+                return;
+            }
+            
+            let subtotal = 0;
+            
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                subtotal += itemTotal;
+                
+                const cartItemElement = document.createElement('div');
+                cartItemElement.className = 'cart-item';
+                cartItemElement.innerHTML = `
+                    <div class="cart-item-info">
+                        <img src="${item.image}" alt="${item.name}" class="cart-item-image">
+                        <div>
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div class="cart-item-actions">
+                        <input type="number" min="1" value="${item.quantity}" class="cart-item-quantity" data-id="${item.id}">
+                        <button class="cart-item-remove" data-id="${item.id}">&times;</button>
+                    </div>
+                `;
+                
+                cartItems.appendChild(cartItemElement);
+            });
+            
+            // Calculate totals
+            const tax = subtotal * 0.08; // 8% tax
+            const deliveryFee = 2.99;
+            const total = subtotal + tax + deliveryFee;
+            
+            // Update totals
+            cartSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+            cartTax.textContent = `$${tax.toFixed(2)}`;
+            cartTotal.textContent = `$${total.toFixed(2)}`;
+            
+            // Add event listeners to quantity inputs and remove buttons
+            document.querySelectorAll('.cart-item-quantity').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    const newQuantity = parseInt(e.target.value);
+                    
+                    if (newQuantity < 1) {
+                        e.target.value = 1;
+                        return;
+                    }
+                    
+                    const cartItem = cart.find(item => item.id === productId);
+                    if (cartItem) {
+                        cartItem.quantity = newQuantity;
+                        updateCart();
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.cart-item-remove').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const productId = parseInt(e.target.dataset.id);
+                    cart = cart.filter(item => item.id !== productId);
+                    updateCart();
+                });
+            });
+        }
+        
+        // Show feedback message
+        function showFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.className = 'feedback-message';
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                feedback.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(feedback);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Event listeners
+        closeProducts.addEventListener('click', () => {
+            productsContainer.classList.remove('active');
+        });
+        
+        cartButton.addEventListener('click', () => {
+            cartModal.classList.add('active');
+            renderCartItems();
+        });
+        
+        closeCart.addEventListener('click', () => {
+            cartModal.classList.remove('active');
+        });
+        
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                showFeedback('Your cart is empty');
+                return;
+            }
+            
+            // In a real app, this would redirect to checkout
+            showFeedback('Proceeding to checkout...');
+            setTimeout(() => {
+                cartModal.classList.remove('active');
+            }, 1000);
+        });
+        
+        allowLocation.addEventListener('click', () => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        
+                        // Update stores distance based on real location
+                        stores.forEach(store => {
+                            // Simple distance calculation (in real app, use more accurate method)
+                            const latDiff = Math.abs(userLocation.lat - store.lat);
+                            const lngDiff = Math.abs(userLocation.lng - store.lng);
+                            const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff) * 69; // Approx miles
+                            store.distance = distance < 1 ? 
+                                `${(distance * 5280).toFixed(0)} feet` : 
+                                `${distance.toFixed(1)} miles`;
+                        });
+                        
+                        localStorage.setItem('locationApproved', 'true');
+                        locationPrompt.style.display = 'none';
+                        initMap();
+                        renderStoresList();
+                    },
+                    (error) => {
+                        console.error("Error getting location:", error);
+                        showFeedback("Couldn't get your location. Using default location.");
+                        localStorage.setItem('locationApproved', 'true');
+                        locationPrompt.style.display = 'none';
+                        initMap();
+                        renderStoresList();
+                    }
+                );
+            } else {
+                showFeedback("Geolocation is not supported by your browser. Using default location.");
+                localStorage.setItem('locationApproved', 'true');
+                locationPrompt.style.display = 'none';
+                initMap();
+                renderStoresList();
+            }
+        });
+        
+        enterManually.addEventListener('click', () => {
+            // In a real app, this would show an address input form
+            showFeedback("Using default location. In a real app, you'd enter an address.");
+            localStorage.setItem('locationApproved', 'true');
+            locationPrompt.style.display = 'none';
+            initMap();
+            renderStoresList();
+        });
+        
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+</html>

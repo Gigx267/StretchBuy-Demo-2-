@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StretchBuy - Buyer Dashboard</title>
+    <style>
+        :root {
+            --primary-green: #34C759; /* Apple-like green */
+            --light-green: #F2FCF4;
+            --dark-green: #248A3D;
+            --white: #FFFFFF;
+            --off-white: #F5F5F7; /* Apple's background color */
+            --light-gray: #E5E5EA;
+            --medium-gray: #D1D1D6;
+            --dark-gray: #1C1C1E;
+            --system-gray: #8E8E93;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-radius: 12px; /* Apple's corner radius */
+            --section-padding: 20px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--off-white);
+            color: var(--dark-gray);
+            line-height: 1.5;
+        }
+        
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background-color: var(--white);
+            border-right: 1px solid var(--light-gray);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .logo {
+            padding: 0 var(--section-padding) 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-green);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            margin-top: 16px;
+        }
+        
+        .nav-item {
+            padding: 12px var(--section-padding);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--light-green);
+        }
+        
+        .nav-item.active {
+            background-color: var(--light-green);
+            color: var(--primary-green);
+            font-weight: 500;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            margin-left: 280px;
+            max-width: calc(100% - 280px);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        /* Dashboard Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--system-gray);
+            font-size: 14px;
+        }
+        
+        .stat-header i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark-gray);
+        }
+        
+        .stat-naira {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--dark-gray);
+        }
+        
+        .stat-naira::before {
+            content: "₦";
+            font-size: 0.8em;
+            margin-right: 2px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-change.negative {
+            color: #FF3B30; /* Apple red */
+        }
+        
+        /* Recent Orders */
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .section-title h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+        
+        .btn {
+            background-color: var(--primary-green);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn i {
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--medium-gray);
+            color: var(--dark-gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--light-gray);
+            border-color: var(--system-gray);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 14px;
+        }
+        
+        th {
+            background-color: var(--off-white);
+            color: var(--system-gray);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: var(--light-green);
+        }
+        
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status i {
+            font-size: 10px;
+        }
+        
+        .status-pending {
+            background-color: #FFF4E5;
+            color: #FF9500;
+        }
+        
+        .status-completed {
+            background-color: #E5F9F0;
+            color: #34C759;
+        }
+        
+        .status-processing {
+            background-color: #E5F1FF;
+            color: #007AFF;
+        }
+        
+        .status-cancelled {
+            background-color: #FFE5E5;
+            color: #FF3B30;
+        }
+        
+        /* Recommended Products */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        
+        .product-card {
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            padding: 16px;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .product-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background-color: var(--off-white);
+        }
+        
+        .product-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--dark-gray);
+        }
+        
+        .product-price {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+        
+        .product-price::before {
+            content: "₦";
+            font-size: 0.9em;
+        }
+        
+        .product-rating {
+            font-size: 13px;
+            color: #FF9500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .product-rating i {
+            font-size: 12px;
+        }
+        
+        .product-rating-count {
+            color: var(--system-gray);
+            font-size: 12px;
+            margin-left: 4px;
+        }
+        
+        .add-to-cart {
+            width: 100%;
+            margin-top: 12px;
+            padding: 8px;
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .add-to-cart:hover {
+            background-color: var(--dark-green);
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                max-width: calc(100% - 240px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 16px;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            
+            .logo {
+                padding: 0 0 16px;
+            }
+            
+            .nav-menu {
+                display: flex;
+                overflow-x: auto;
+                margin-top: 0;
+                padding-bottom: 8px;
+            }
+            
+            .nav-item {
+                padding: 8px 16px;
+                white-space: nowrap;
+                border-radius: 20px;
+                margin-right: 8px;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+                padding: 20px;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">SB</div>
+                <div class="logo-text">StretchBuy</div>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>My Orders</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-heart"></i>
+                    <span>Wishlist</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-box-open"></i>
+                    <span>My Subscriptions</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Addresses</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-wallet"></i>
+                    <span>Payment Methods</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Welcome back, Tunde!</h1>
+                <div class="user-profile">
+                    <img src="https://images.unsplash.com/photo-1529688530647-93a6e1916f5f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fG5pZ2VyaWFuJTIwbWFufGVufDB8fDB8fHww" alt="User" class="user-avatar">
+                    <span class="user-name">Tunde A.</span>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-cards">
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Active Orders</span>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 1 new today
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-naira-sign"></i>
+                        <span>Monthly Spend</span>
+                    </div>
+                    <div class="stat-naira">68,400</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i> 12% from last month
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-star"></i>
+                        <span>Loyalty Points</span>
+                    </div>
+                    <div class="stat-value">1,245</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 45 this week
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-percent"></i>
+                        <span>Discounts Available</span>
+                    </div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 2 new offers
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="section">
+                <div class="section-title">
+                    <h2>Recent Orders</h2>
+                    <button class="btn">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>View All</span>
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Items</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#SB-1001</td>
+                                <td>Garri, Beans, Palm Oil</td>
+                                <td class="stat-naira">12,800</td>
+                                <td><span class="status status-processing"><i class="fas fa-sync-alt"></i> Processing</span></td>
+                                <td><button class="btn-outline">Track</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-1000</td>
+                                <td>Rice, Tomatoes, Onions</td>
+                                <td class="stat-naira">9,500</td>
+                                <td><span class="status status-completed"><i class="fas fa-check"></i> Delivered</span></td>
+                                <td><button class="btn-outline">Reorder</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-0999</td>
+                                <td>Yam, Eggs, Pepper</td>
+                                <td class="stat-naira">7,200</td>
+                                <td><span class="status status-completed"><i class="fas fa-check"></i> Delivered</span></td>
+                                <td><button class="btn-outline">Rate</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-0998</td>
+                                <td>Groundnut Oil, Semo</td>
+                                <td class="stat-naira">15,300</td>
+                                <td><span class="status status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                <td><button class="btn-outline">Cancel</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Recommended Products -->
+            <div class="section">
+                <div class="section-title">
+                    <h2>Recommended For You</h2>
+                    <button class="btn">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>Browse All</span>
+                    </button>
+                </div>
+                
+                <div class="product-grid">
+                    <div class="card product-card">
+                        <img src="https://images.unsplash.com/photo-1589927986089-35812388d1f4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="Organic Apples" class="product-image">
+                        <h4 class="product-name">Fresh Carrots (1kg)</h4>
+                        <p class="product-price">1,200</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.8</span>
+                            <span class="product-rating-count">(124)</span>
+                        </div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                    <div class="card product-card">
+                        <img src="https://plus.unsplash.com/premium_photo-1671130295735-25af5e78d40c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fEJlYW5zfGVufDB8fDB8fHww" alt="Free Range Eggs" class="product-image">
+                        <h4 class="product-name">Brown Beans (2kg)</h4>
+                        <p class="product-price">3,500</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.6</span>
+                            <span class="product-rating-count">(89)</span>
+                        </div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                    <div class="card product-card">
+                        <img src="https://images.unsplash.com/photo-1592518530101-c7413d0c1118?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8R2Fycml8ZW58MHx8MHx8fDA%3D" alt="Whole Wheat Bread" class="product-image">
+                        <h4 class="product-name">Ijebu Garri (5kg)</h4>
+                        <p class="product-price">6,800</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.9</span>
+                            <span class="product-rating-count">(215)</span>
+                        </div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                    <div class="card product-card">
+                        <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8R3JvdW5kbnV0JTIwb2lsfGVufDB8fDB8fHww" alt="Organic Milk" class="product-image">
+                        <h4 class="product-name">Pure Groundnut Oil (1L)</h4>
+                        <p class="product-price">4,200</p>
+                        <div class="product-rating">
+                            <i class="fas fa-star"></i>
+                            <span>4.7</span>
+                            <span class="product-rating-count">(156)</span>
+                        </div>
+                        <button class="add-to-cart">Add to Cart</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

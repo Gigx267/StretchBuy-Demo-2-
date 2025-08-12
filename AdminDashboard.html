@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StretchBuy - Admin Dashboard</title>
+    <style>
+        :root {
+            --primary-green: #34C759;
+            --light-green: #F2FCF4;
+            --dark-green: #248A3D;
+            --white: #FFFFFF;
+            --off-white: #F5F5F7;
+            --light-gray: #E5E5EA;
+            --medium-gray: #D1D1D6;
+            --dark-gray: #1C1C1E;
+            --system-gray: #8E8E93;
+            --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-radius: 12px;
+            --section-padding: 20px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--off-white);
+            color: var(--dark-gray);
+            line-height: 1.5;
+        }
+        
+        .dashboard {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: var(--white);
+            border-right: 1px solid var(--light-gray);
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        
+        .logo {
+            padding: 0 var(--section-padding) 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary-green);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .nav-menu {
+            margin-top: 16px;
+        }
+        
+        .nav-section {
+            padding: 8px var(--section-padding);
+            color: var(--system-gray);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 16px;
+        }
+        
+        .nav-item {
+            padding: 12px var(--section-padding);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 15px;
+            color: var(--dark-gray);
+            text-decoration: none;
+        }
+        
+        .nav-item:hover {
+            background-color: var(--light-green);
+        }
+        
+        .nav-item.active {
+            background-color: var(--light-green);
+            color: var(--primary-green);
+            font-weight: 500;
+        }
+        
+        .nav-item i {
+            width: 24px;
+            margin-right: 12px;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 24px;
+            margin-left: 280px;
+            max-width: calc(100% - 280px);
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--white);
+            border-radius: 20px;
+            padding: 8px 16px;
+            width: 300px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .search-bar input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            padding: 4px;
+            font-size: 14px;
+        }
+        
+        .search-bar i {
+            color: var(--system-gray);
+            margin-right: 8px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .card {
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--system-gray);
+            font-size: 14px;
+        }
+        
+        .stat-header i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .stat-naira {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .stat-naira::before {
+            content: "₦";
+            font-size: 0.8em;
+            margin-right: 2px;
+        }
+        
+        .stat-change {
+            font-size: 13px;
+            color: var(--primary-green);
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-change.negative {
+            color: #FF3B30;
+        }
+        
+        /* Platform Overview */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .chart-container {
+            height: 300px;
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        /* Recent Activity */
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            box-shadow: var(--card-shadow);
+        }
+        
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+        
+        .activity-details {
+            flex: 1;
+        }
+        
+        .activity-meta {
+            font-size: 12px;
+            color: var(--system-gray);
+            margin-top: 4px;
+        }
+        
+        /* Tables */
+        .section {
+            margin-bottom: 24px;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .section-title h2 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .btn {
+            background-color: var(--primary-green);
+            color: var(--white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn i {
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark-green);
+            transform: translateY(-1px);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--medium-gray);
+            color: var(--dark-gray);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--light-gray);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--white);
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+        
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+            font-size: 14px;
+        }
+        
+        th {
+            background-color: var(--off-white);
+            color: var(--system-gray);
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: var(--light-green);
+        }
+        
+        .status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .status i {
+            font-size: 10px;
+        }
+        
+        .status-active {
+            background-color: #E5F9F0;
+            color: #34C759;
+        }
+        
+        .status-pending {
+            background-color: #FFF4E5;
+            color: #FF9500;
+        }
+        
+        .status-suspended {
+            background-color: #FFE5E5;
+            color: #FF3B30;
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 240px;
+            }
+            
+            .main-content {
+                margin-left: 240px;
+                max-width: calc(100% - 240px);
+            }
+            
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 16px;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+                padding: 20px;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+            
+            .search-bar {
+                width: 100%;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">SB</div>
+                <div class="logo-text">StretchBuy</div>
+            </div>
+            
+            <div class="nav-menu">
+                <div class="nav-section">Dashboard</div>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Overview</span>
+                </a>
+                
+                <div class="nav-section">Management</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-users"></i>
+                    <span>Users</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-store"></i>
+                    <span>Sellers</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>Products</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categories</span>
+                </a>
+                
+                <div class="nav-section">Transactions</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Orders</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span>Payments</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-percent"></i>
+                    <span>Discounts</span>
+                </a>
+                
+                <div class="nav-section">System</div>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>Admin Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search...">
+                    </div>
+                    <div class="user-profile">
+                        <img src="https://images.unsplash.com/photo-1620932934088-fbdb2920e484?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bmlnZXJpYW4lMjBtYW58ZW58MHx8MHx8fDA%3D" alt="Admin" class="user-avatar">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-cards">
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-users"></i>
+                        <span>Total Users</span>
+                    </div>
+                    <div class="stat-value">12,458</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 8.2% this month
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-store"></i>
+                        <span>Active Sellers</span>
+                    </div>
+                    <div class="stat-value">1,245</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 3.1% this month
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Daily Orders</span>
+                    </div>
+                    <div class="stat-value">384</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i> 2.4% from yesterday
+                    </div>
+                </div>
+                <div class="card stat-card">
+                    <div class="stat-header">
+                        <i class="fas fa-naira-sign"></i>
+                        <span>Platform Revenue</span>
+                    </div>
+                    <div class="stat-naira">8,245,600</div>
+                    <div class="stat-change">
+                        <i class="fas fa-arrow-up"></i> 12.7% this month
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Platform Overview -->
+            <div class="overview-grid">
+                <div class="card chart-container">
+                    <div class="section-title">
+                        <h2>Sales Analytics</h2>
+                        <div>
+                            <button class="btn-outline">Daily</button>
+                            <button class="btn-outline">Weekly</button>
+                            <button class="btn">Monthly</button>
+                        </div>
+                    </div>
+                    <!-- Chart would be rendered here -->
+                    <div style="height: 240px; display: flex; align-items: center; justify-content: center; color: var(--system-gray);">
+                        [Sales Chart Visualization]
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="section-title">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <img src="https://images.unsplash.com/photo-1589635021366-24ce21374163?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fE5pZ2VyaWFuJTIwd29tYW58ZW58MHx8MHx8fDA%3D" alt="User" class="activity-avatar">
+                            <div class="activity-details">
+                                <strong>Amina K.</strong> placed an order for ₦24,500
+                                <div class="activity-meta">2 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <img src="https://plus.unsplash.com/premium_photo-1692873060123-59ef129f9bac?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8TmlnZXJpYW4lMjB3b21hbnxlbnwwfHwwfHx8MA%3D%3D" alt="Seller" class="activity-avatar">
+                            <div class="activity-details">
+                                <strong>FarmFresh Ltd</strong> added 12 new products
+                                <div class="activity-meta">15 minutes ago</div>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8ZmFjZXxlbnwwfHwwfHx8MA%3D%3D" alt="User" class="activity-avatar">
+                            <div class="activity-details">
+                                <strong>Oluwaseun B.</strong> registered as a new seller
+                                <div class="activity-meta">1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Sellers -->
+            <div class="section">
+                <div class="section-title">
+                    <h2>Recent Sellers</h2>
+                    <button class="btn">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Seller</span>
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Seller ID</th>
+                                <th>Business Name</th>
+                                <th>Owner</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#SB-S1001</td>
+                                <td>Efe Exclusive</td>
+                                <td>Efe A.</td>
+                                <td>48</td>
+                                <td><span class="status status-active"><i class="fas fa-check-circle"></i> Active</span></td>
+                                <td><button class="btn-outline">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-S1000</td>
+                                <td>FarmFresh Ltd</td>
+                                <td>Chinedu O.</td>
+                                <td>126</td>
+                                <td><span class="status status-active"><i class="fas fa-check-circle"></i> Active</span></td>
+                                <td><button class="btn-outline">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-S0999</td>
+                                <td>AgroKing</td>
+                                <td>Chioma N.</td>
+                                <td>32</td>
+                                <td><span class="status status-pending"><i class="fas fa-clock"></i> Pending</span></td>
+                                <td><button class="btn-outline">Approve</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-S0998</td>
+                                <td>Organic Haven</td>
+                                <td>Tunde B.</td>
+                                <td>0</td>
+                                <td><span class="status status-suspended"><i class="fas fa-times-circle"></i> Suspended</span></td>
+                                <td><button class="btn-outline">Review</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="section">
+                <div class="section-title">
+                    <h2>Recent Orders</h2>
+                    <button class="btn">
+                        <i class="fas fa-download"></i>
+                        <span>Export</span>
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Seller</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#SB-1001</td>
+                                <td>Tunde A.</td>
+                                <td>Efe Exclusive</td>
+                                <td class="stat-naira">12,800</td>
+                                <td><span class="status status-active"><i class="fas fa-truck"></i> Shipped</span></td>
+                                <td><button class="btn-outline">Track</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-1000</td>
+                                <td>Amina K.</td>
+                                <td>FarmFresh Ltd</td>
+                                <td class="stat-naira">24,500</td>
+                                <td><span class="status status-active"><i class="fas fa-check"></i> Delivered</span></td>
+                                <td><button class="btn-outline">View</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-0999</td>
+                                <td>Oluwaseun B.</td>
+                                <td>AgroKing</td>
+                                <td class="stat-naira">7,200</td>
+                                <td><span class="status status-pending"><i class="fas fa-clock"></i> Processing</span></td>
+                                <td><button class="btn-outline">Update</button></td>
+                            </tr>
+                            <tr>
+                                <td>#SB-0998</td>
+                                <td>Chika O.</td>
+                                <td>Organic Haven</td>
+                                <td class="stat-naira">15,300</td>
+                                <td><span class="status status-suspended"><i class="fas fa-times"></i> Cancelled</span></td>
+                                <td><button class="btn-outline">Details</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
